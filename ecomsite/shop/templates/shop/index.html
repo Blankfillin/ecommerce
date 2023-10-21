@@ -86,8 +86,8 @@
                         <div class="card">
                             <img class="card-img-top" src="{{ product.image }}" alt="na">
                             <div class="card-body">
-                                <div class="card-title">{{ product.title }}</div>
-                                <div class="card-text">${{ product.price }}</div>
+                                <div id="nm{{ product.id }}" class="card-title">{{ product.title }}</div>
+                                <div id="price{{ product.id }}" class="card-text">{{ product.price }}</div>
                                 <a href="{% url "shop:product_detail" pk=product.pk %}"
                                    class="btn btn-warning">View</a>
                                 <button id="{{ product.pk }}"class="btn atc btn-warning">Add to Cart</button>
@@ -131,18 +131,37 @@
             var item_id = this.id.toString();
             console.log(item_id);
             if(cart[item_id]!=undefined){
-                cart[item_id] = cart[item_id] + 1;
+                quantity = cart[item_id][0] + 1;
+                cart[item_id][0] = quantity;
+                cart[item_id][2] = cart[item_id][2] + parseFloat(document.getElementById("price"+item_id).innerHTML);
+
             }
             else{
-                cart[item_id] = 1;
+                quantity = 1;
+                name = document.getElementById("nm"+item_id).innerHTML;
+                price = parseFloat(document.getElementById("price"+item_id).innerHTML);
+                cart[item_id] = [quantity,name,price];
             }
-            console.log(cart)
             localStorage.setItem("cart",JSON.stringify(cart));
             document.getElementById("cart").innerHTML = "Cart("+ Object.keys(cart).length + ")";
         });
-        $(function () {
+
+
+        DisplayCart(cart);
+        function DisplayCart(cart){
+            var cartString = "";
+            cartString += "<h5>This is your cart</h5>";
+            var cartIndex = 1
+            let cartObject = JSON.parse(localStorage.getItem('cart'))
+            for (var x in cartObject){
+                cartString += cartIndex + " ";
+                cartString += document.getElementById("nm"+x).innerHTML + " QTY:" + cartObject[x][0] + "</br>";
+                cartIndex += 1;
+            }
+
+            cartString += "<a href='/checkout'><button class='btn btn-warning' id='checkout'>Checkout</button></a>";
+            document.getElementById("cart").setAttribute("data-content",cartString);
             $('[data-toggle="popover"]').popover();
-            document.getElementById("cart").setAttribute("data-content","<h5>This is your cart</h5>")
-          });
+        }
     </script>
 </html>
